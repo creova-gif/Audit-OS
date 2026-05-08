@@ -1,22 +1,38 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AuditOS API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: clients
+    description: Client management
+  - name: engagements
+    description: Audit engagement management
+  - name: anomalies
+    description: GL anomaly detection and review
+  - name: findings
+    description: Audit findings
+  - name: working-papers
+    description: Working papers
+  - name: data-room
+    description: Data room document management
+  - name: staff
+    description: Firm staff
+  - name: dashboard
+    description: Dashboard summaries
+  - name: ai
+    description: AI-powered analysis
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +40,627 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /staff:
+    get:
+      operationId: listStaff
+      tags: [staff]
+      summary: List all staff members
+      responses:
+        "200":
+          description: List of staff
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Staff"
+    post:
+      operationId: createStaff
+      tags: [staff]
+      summary: Create a staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStaffBody"
+      responses:
+        "201":
+          description: Created staff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Staff"
+
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List all clients
+      responses:
+        "200":
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Create a new client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientBody"
+      responses:
+        "201":
+          description: Created client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{id}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get a client by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClientBody"
+      responses:
+        "200":
+          description: Updated client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /engagements:
+    get:
+      operationId: listEngagements
+      tags: [engagements]
+      summary: List all engagements
+      responses:
+        "200":
+          description: List of engagements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Engagement"
+    post:
+      operationId: createEngagement
+      tags: [engagements]
+      summary: Create a new engagement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEngagementBody"
+      responses:
+        "201":
+          description: Created engagement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Engagement"
+
+  /engagements/{id}:
+    get:
+      operationId: getEngagement
+      tags: [engagements]
+      summary: Get an engagement by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Engagement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Engagement"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateEngagement
+      tags: [engagements]
+      summary: Update an engagement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEngagementBody"
+      responses:
+        "200":
+          description: Updated engagement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Engagement"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /anomalies:
+    get:
+      operationId: listAnomalies
+      tags: [anomalies]
+      summary: List GL anomalies
+      parameters:
+        - name: engagementId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: riskLevel
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of anomalies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GlAnomaly"
+    post:
+      operationId: createAnomaly
+      tags: [anomalies]
+      summary: Create a GL anomaly record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAnomalyBody"
+      responses:
+        "201":
+          description: Created anomaly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlAnomaly"
+
+  /anomalies/{id}:
+    get:
+      operationId: getAnomaly
+      tags: [anomalies]
+      summary: Get an anomaly by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Anomaly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlAnomaly"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateAnomaly
+      tags: [anomalies]
+      summary: Update anomaly status and notes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAnomalyBody"
+      responses:
+        "200":
+          description: Updated anomaly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlAnomaly"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /anomalies/{id}/analyze:
+    post:
+      operationId: analyzeAnomaly
+      tags: [ai]
+      summary: AI deep-dive analysis of an anomaly
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiAnalysisResult"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /findings:
+    get:
+      operationId: listFindings
+      tags: [findings]
+      summary: List audit findings
+      parameters:
+        - name: engagementId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of findings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Finding"
+    post:
+      operationId: createFinding
+      tags: [findings]
+      summary: Create a new finding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFindingBody"
+      responses:
+        "201":
+          description: Created finding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Finding"
+
+  /findings/{id}:
+    get:
+      operationId: getFinding
+      tags: [findings]
+      summary: Get a finding by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Finding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Finding"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateFinding
+      tags: [findings]
+      summary: Update a finding
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFindingBody"
+      responses:
+        "200":
+          description: Updated finding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Finding"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /working-papers:
+    get:
+      operationId: listWorkingPapers
+      tags: [working-papers]
+      summary: List working papers
+      parameters:
+        - name: engagementId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of working papers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkingPaper"
+    post:
+      operationId: createWorkingPaper
+      tags: [working-papers]
+      summary: Create a new working paper
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkingPaperBody"
+      responses:
+        "201":
+          description: Created working paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkingPaper"
+
+  /working-papers/{id}:
+    get:
+      operationId: getWorkingPaper
+      tags: [working-papers]
+      summary: Get a working paper by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Working paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkingPaper"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateWorkingPaper
+      tags: [working-papers]
+      summary: Update a working paper
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkingPaperBody"
+      responses:
+        "200":
+          description: Updated working paper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkingPaper"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /working-papers/{id}/draft:
+    post:
+      operationId: draftWorkingPaper
+      tags: [ai]
+      summary: AI-draft content for a working paper
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI drafted content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiDraftResult"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /data-room:
+    get:
+      operationId: listDataRoomItems
+      tags: [data-room]
+      summary: List data room items
+      parameters:
+        - name: engagementId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of data room items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataRoomItem"
+    post:
+      operationId: createDataRoomItem
+      tags: [data-room]
+      summary: Create a data room item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDataRoomItemBody"
+      responses:
+        "201":
+          description: Created item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataRoomItem"
+
+  /data-room/{id}:
+    patch:
+      operationId: updateDataRoomItem
+      tags: [data-room]
+      summary: Update a data room item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDataRoomItemBody"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataRoomItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +671,668 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    DashboardSummary:
+      type: object
+      properties:
+        activeEngagements:
+          type: integer
+        totalEngagements:
+          type: integer
+        unreviewedAnomalies:
+          type: integer
+        criticalAnomalies:
+          type: integer
+        openFindings:
+          type: integer
+        totalFindings:
+          type: integer
+        totalClients:
+          type: integer
+        totalStaff:
+          type: integer
+        workingPapersPendingSignOff:
+          type: integer
+        recentAnomalies:
+          type: array
+          items:
+            $ref: "#/components/schemas/GlAnomaly"
+        recentFindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Finding"
+        engagementsByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        anomaliesByType:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeCount"
+      required:
+        - activeEngagements
+        - totalEngagements
+        - unreviewedAnomalies
+        - criticalAnomalies
+        - openFindings
+        - totalFindings
+        - totalClients
+        - totalStaff
+        - workingPapersPendingSignOff
+        - recentAnomalies
+        - recentFindings
+        - engagementsByStatus
+        - anomaliesByType
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required:
+        - status
+        - count
+
+    TypeCount:
+      type: object
+      properties:
+        type:
+          type: string
+        count:
+          type: integer
+      required:
+        - type
+        - count
+
+    Staff:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        nbaaMemberNo:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - fullName
+        - email
+        - role
+        - isActive
+        - createdAt
+
+    CreateStaffBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        nbaaMemberNo:
+          type: ["string", "null"]
+      required:
+        - fullName
+        - email
+        - role
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        tin:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        entityType:
+          type: ["string", "null"]
+        financialYearEnd:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        contactPhone:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - isActive
+        - createdAt
+
+    CreateClientBody:
+      type: object
+      properties:
+        name:
+          type: string
+        tin:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        entityType:
+          type: ["string", "null"]
+        financialYearEnd:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        contactPhone:
+          type: ["string", "null"]
+      required:
+        - name
+
+    UpdateClientBody:
+      type: object
+      properties:
+        name:
+          type: string
+        tin:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        entityType:
+          type: ["string", "null"]
+        financialYearEnd:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        contactPhone:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+
+    Engagement:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientId:
+          type: integer
+        engagementName:
+          type: string
+        periodStart:
+          type: string
+        periodEnd:
+          type: string
+        engagementType:
+          type: string
+        status:
+          type: string
+        partnerId:
+          type: ["integer", "null"]
+        managerId:
+          type: ["integer", "null"]
+        materialityUsd:
+          type: ["number", "null"]
+        performanceMatUsd:
+          type: ["number", "null"]
+        overallRisk:
+          type: string
+        reportDate:
+          type: ["string", "null"]
+        signedOffAt:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        client:
+          $ref: "#/components/schemas/Client"
+      required:
+        - id
+        - clientId
+        - engagementName
+        - periodStart
+        - periodEnd
+        - engagementType
+        - status
+        - overallRisk
+        - createdAt
+        - updatedAt
+        - client
+
+    CreateEngagementBody:
+      type: object
+      properties:
+        clientId:
+          type: integer
+        engagementName:
+          type: string
+        periodStart:
+          type: string
+        periodEnd:
+          type: string
+        engagementType:
+          type: string
+        overallRisk:
+          type: string
+        partnerId:
+          type: ["integer", "null"]
+        managerId:
+          type: ["integer", "null"]
+        materialityUsd:
+          type: ["number", "null"]
+        reportDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - clientId
+        - engagementName
+        - periodStart
+        - periodEnd
+        - engagementType
+        - overallRisk
+
+    UpdateEngagementBody:
+      type: object
+      properties:
+        engagementName:
+          type: string
+        status:
+          type: string
+        overallRisk:
+          type: string
+        materialityUsd:
+          type: ["number", "null"]
+        reportDate:
+          type: ["string", "null"]
+        signedOffAt:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        partnerId:
+          type: ["integer", "null"]
+        managerId:
+          type: ["integer", "null"]
+
+    GlAnomaly:
+      type: object
+      properties:
+        id:
+          type: integer
+        engagementId:
+          type: integer
+        anomalyType:
+          type: string
+        riskLevel:
+          type: string
+        accountCode:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        journalRef:
+          type: ["string", "null"]
+        transactionDate:
+          type: ["string", "null"]
+        amount:
+          type: ["number", "null"]
+        description:
+          type: ["string", "null"]
+        aiExplanation:
+          type: ["string", "null"]
+        auditorStatus:
+          type: string
+        auditorNotes:
+          type: ["string", "null"]
+        reviewedBy:
+          type: ["integer", "null"]
+        reviewedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - engagementId
+        - anomalyType
+        - riskLevel
+        - auditorStatus
+        - createdAt
+
+    CreateAnomalyBody:
+      type: object
+      properties:
+        engagementId:
+          type: integer
+        anomalyType:
+          type: string
+        riskLevel:
+          type: string
+        accountCode:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        journalRef:
+          type: ["string", "null"]
+        transactionDate:
+          type: ["string", "null"]
+        amount:
+          type: ["number", "null"]
+        description:
+          type: ["string", "null"]
+        aiExplanation:
+          type: ["string", "null"]
+      required:
+        - engagementId
+        - anomalyType
+        - riskLevel
+
+    UpdateAnomalyBody:
+      type: object
+      properties:
+        auditorStatus:
+          type: string
+        auditorNotes:
+          type: ["string", "null"]
+        reviewedBy:
+          type: ["integer", "null"]
+
+    AiAnalysisResult:
+      type: object
+      properties:
+        analysis:
+          type: string
+        updatedExplanation:
+          type: string
+      required:
+        - analysis
+        - updatedExplanation
+
+    Finding:
+      type: object
+      properties:
+        id:
+          type: integer
+        engagementId:
+          type: integer
+        anomalyId:
+          type: ["integer", "null"]
+        findingRef:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        riskLevel:
+          type: string
+        isaReference:
+          type: ["string", "null"]
+        nbaaReference:
+          type: ["string", "null"]
+        managementResponse:
+          type: ["string", "null"]
+        status:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        resolvedAt:
+          type: ["string", "null"]
+        raisedBy:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - engagementId
+        - findingRef
+        - title
+        - description
+        - riskLevel
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateFindingBody:
+      type: object
+      properties:
+        engagementId:
+          type: integer
+        anomalyId:
+          type: ["integer", "null"]
+        title:
+          type: string
+        description:
+          type: string
+        riskLevel:
+          type: string
+        isaReference:
+          type: ["string", "null"]
+        nbaaReference:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        raisedBy:
+          type: ["integer", "null"]
+      required:
+        - engagementId
+        - title
+        - description
+        - riskLevel
+
+    UpdateFindingBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        riskLevel:
+          type: string
+        managementResponse:
+          type: ["string", "null"]
+        status:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        resolvedAt:
+          type: ["string", "null"]
+
+    WorkingPaper:
+      type: object
+      properties:
+        id:
+          type: integer
+        engagementId:
+          type: integer
+        wpRef:
+          type: string
+        section:
+          type: string
+        title:
+          type: string
+        aiDrafted:
+          type: boolean
+        contentText:
+          type: ["string", "null"]
+        status:
+          type: string
+        preparedBy:
+          type: ["integer", "null"]
+        preparedAt:
+          type: ["string", "null"]
+        reviewedBy:
+          type: ["integer", "null"]
+        reviewedAt:
+          type: ["string", "null"]
+        signedOffBy:
+          type: ["integer", "null"]
+        signedOffAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - engagementId
+        - wpRef
+        - section
+        - title
+        - aiDrafted
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateWorkingPaperBody:
+      type: object
+      properties:
+        engagementId:
+          type: integer
+        wpRef:
+          type: string
+        section:
+          type: string
+        title:
+          type: string
+        contentText:
+          type: ["string", "null"]
+        preparedBy:
+          type: ["integer", "null"]
+      required:
+        - engagementId
+        - wpRef
+        - section
+        - title
+
+    UpdateWorkingPaperBody:
+      type: object
+      properties:
+        title:
+          type: string
+        contentText:
+          type: ["string", "null"]
+        status:
+          type: string
+        preparedBy:
+          type: ["integer", "null"]
+        preparedAt:
+          type: ["string", "null"]
+        reviewedBy:
+          type: ["integer", "null"]
+        reviewedAt:
+          type: ["string", "null"]
+        signedOffBy:
+          type: ["integer", "null"]
+        signedOffAt:
+          type: ["string", "null"]
+
+    AiDraftResult:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    DataRoomItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        engagementId:
+          type: integer
+        category:
+          type: string
+        itemName:
+          type: string
+        description:
+          type: ["string", "null"]
+        requestedAt:
+          type: string
+          format: date-time
+        dueDate:
+          type: ["string", "null"]
+        receivedAt:
+          type: ["string", "null"]
+        fileName:
+          type: ["string", "null"]
+        status:
+          type: string
+        requestedBy:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - engagementId
+        - category
+        - itemName
+        - requestedAt
+        - status
+        - createdAt
+
+    CreateDataRoomItemBody:
+      type: object
+      properties:
+        engagementId:
+          type: integer
+        category:
+          type: string
+        itemName:
+          type: string
+        description:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        requestedBy:
+          type: ["integer", "null"]
+      required:
+        - engagementId
+        - category
+        - itemName
+
+    UpdateDataRoomItemBody:
+      type: object
+      properties:
+        status:
+          type: string
+        receivedAt:
+          type: ["string", "null"]
+        fileName:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
